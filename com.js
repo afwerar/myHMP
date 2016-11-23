@@ -8,16 +8,16 @@ var serialports = new Array();
 
 function creatSerialPort(port) {
     this._port = port;
-    this.serialPort = new SerialPort(this._port, {
+    var serialPort = new SerialPort(port, {
         baudrate: 9600, dataBits: 8, parity: 'none', stopBits: 1,flowControl: false
     });
-    this.serialPort.on("open", function () {
+    serialPort.on("open", function () {
         console.log(port + " open successfully！");
     });
-    this.serialPort.on('data', function(data) {
+    serialPort.on('data', function(data) {
         io.writeIO(port,data);
     });
-    this.serialPort.on('error', function(err) {
+    serialPort.on('error', function(err) {
         console.log(err);
     });
 }
