@@ -8,16 +8,16 @@ var serialports = new Array();
 
 function creatSerialPort(port) {
     this._port = port;
-    var serialPort = new SerialPort(port, {
+    this.serialPort = new SerialPort(port, {
         baudrate: 9600, dataBits: 8, parity: 'none', stopBits: 1,flowControl: false
     });
-    serialPort.on("open", function () {
+    this.serialPort.on("open", function () {
         console.log(port + " open successfully！");
     });
-    serialPort.on('data', function(data) {
+    this.serialPort.on('data', function(data) {
         io.writeIO(port,data);
     });
-    serialPort.on('error', function(err) {
+    this.serialPort.on('error', function(err) {
         console.log(err);
     });
 }
@@ -39,4 +39,15 @@ exports.writePort=function(port,data){
             });
         }
     }
+}
+
+exports.getOpeningPort=function () {
+    var openList = [];
+    var length = serialports.length;
+    for (var i=0;i<length;i++){
+        if(serialports[i].serialPort.isOpen()){
+            openList.push(serialports[i]._port);
+        }
+    }
+    return openList;
 }

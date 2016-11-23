@@ -8,10 +8,26 @@
 </head>
 <body>
     <h1><%= title %></h1>
-    <input id="openbtn" type="button" value="打开端口" onclick="openSerialPort()"/>
+    <% if (ports.length) { %>
+    <ul>
+        存在的端口:
+        <% ports.forEach(function(port){ %>
+        <label><input name="COM" id='<%= port %>' type="checkbox" value="1" /><%= port %> </label>
+        <% }) %>
+    </ul>
+    <% } %>
+    <% if (openports.length) { %>
+    <ul>
+        可连的端口:
+        <% openports.forEach(function(openport){ %>
+        <label><input name="COM" id='<%= openport %>' type="checkbox" value="1" /><%= openport %> </label>
+        <% }) %>
+    </ul>
+    <% } %>
+    <input id="openbtn" type="button" value="连接端口" onclick="openSerialPort()"/>
     <p>
         com: <input type="text" id="port" value="COM1" size="12" maxlength="20">
-    <br>
+    <br />
     <textarea id="sendTextArea" cols="50" rows="10"></textarea>
     <input id="sendbtn" type="button" value="发送数据" onclick="sendText()" disabled="true"/>
     <br>
@@ -20,14 +36,14 @@
 <script type="text/javascript">
     var socket = io();
     function openSerialPort(){
-        if(document.getElementById("openbtn").value==="打开端口"){
+        if(document.getElementById("openbtn").value==="连接端口"){
             socket.emit('openPort',document.getElementById("port").value);
         }else {
             socket.emit('closePort');
             document.getElementById("port").readonly=false;
             document.getElementById("port").disabled=false;
             document.getElementById("sendbtn").disabled=true;
-            document.getElementById("openbtn").value="打开端口";
+            document.getElementById("openbtn").value="连接端口";
         }
     }
     function sendText(){
@@ -37,11 +53,11 @@
 
     //监听事件
     socket.on('openSuccess', function(){
-        if(document.getElementById("openbtn").value==="打开端口"){
+        if(document.getElementById("openbtn").value==="连接端口"){
             document.getElementById("port").readonly=true;
             document.getElementById("port").disabled=true;
             document.getElementById("sendbtn").disabled=false;
-            document.getElementById("openbtn").value="关闭端口";
+            document.getElementById("openbtn").value="断开连接";
         }
     });
     socket.on('serverToClient', function(port,data){
@@ -51,7 +67,7 @@
         document.getElementById("port").readonly=false;
         document.getElementById("port").disabled=false;
         document.getElementById("sendbtn").disabled=true;
-        document.getElementById("openbtn").value="打开端口";
+        document.getElementById("openbtn").value="连接端口";
     });
 </script>
 </html>
