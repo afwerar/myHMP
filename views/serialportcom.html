@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <!--socket.io-->
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <input id="openbtn" type="button" value="打开端口" onclick="openSerialPort()"/>
+    <p>
+        com: <input type="text" id="port" value="COM1" size="12" maxlength="20">
+    <br>
+    <textarea id="sendTextArea" cols="50" rows="10"></textarea>
+    <input id="sendbtn" type="button" value="发送数据" onclick="sendText()" disabled="true"/>
+    <br>
+    <textarea id="recvTextArea" cols="50" rows="10"></textarea>
+</body>
+<script type="text/javascript">
+    var socket = io();
+    function openSerialPort(){
+        if(document.getElementById("openbtn").value==="打开端口"){
+            socket.emit('openPort',document.getElementById("port").value);
+        }else {
+            socket.emit('closePort');
+            document.getElementById("port").readonly=false;
+            document.getElementById("port").disabled=false;
+            document.getElementById("sendbtn").disabled=true;
+            document.getElementById("openbtn").value="打开端口";
+        }
+    }
+    function sendText(){
+        socket.emit('clientToServer',document.getElementById("port").value,
+                document.getElementById("sendTextArea").value);
+    }
+
+    //监听事件
+    socket.on('openSuccess', function(){
+        if(document.getElementById("openbtn").value==="打开端口"){
+            document.getElementById("port").readonly=true;
+            document.getElementById("port").disabled=true;
+            document.getElementById("sendbtn").disabled=false;
+            document.getElementById("openbtn").value="关闭端口";
+        }
+    });
+    socket.on('serverToClient', function(port,data){
+        document.getElementById("recvTextArea").value += data;
+    });
+    socket.on('disconnect', function(){
+        document.getElementById("port").readonly=false;
+        document.getElementById("port").disabled=false;
+        document.getElementById("sendbtn").disabled=true;
+        document.getElementById("openbtn").value="打开端口";
+    });
+</script>
+</html>

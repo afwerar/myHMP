@@ -1,0 +1,5 @@
+{
+  "serialport":["COM1","COM3"],
+  "socketport":["7000"],
+  "webport": "3000"
+}
