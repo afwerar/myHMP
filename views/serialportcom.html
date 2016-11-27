@@ -52,6 +52,14 @@
     }
 
     //监听事件
+    socket.on('online', function(){
+        if(document.getElementById("openbtn").disabled){
+            document.getElementById("openbtn").disabled=false;
+            socket.emit('openPort',document.getElementById("port").value);
+            document.getElementById("recvTextArea").value += "a";
+        }
+        document.getElementById("recvTextArea").value += "b";
+    });
     socket.on('openSuccess', function(){
         if(document.getElementById("openbtn").value==="连接端口"){
             document.getElementById("port").readonly=true;
@@ -67,6 +75,7 @@
         document.getElementById("port").readonly=false;
         document.getElementById("port").disabled=false;
         document.getElementById("sendbtn").disabled=true;
+        document.getElementById("openbtn").disabled=true;
         document.getElementById("openbtn").value="连接端口";
     });
 </script>

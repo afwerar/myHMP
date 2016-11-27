@@ -11,9 +11,7 @@ router.get('/', function(req, res, next) {
     serialPort.list(function (err, ports) {
         var portnames = [];
         var openportnames = com.getOpeningPort();
-            ports.forEach(function(port) {
-            // console.log(port.comName);
-            // console.log(port.pnpId);
+        ports.forEach(function(port) {
             if(port.pnpId===undefined){
                 portnames.push(port.comName);
             }

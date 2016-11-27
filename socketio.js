@@ -12,6 +12,7 @@ exports.getSocketio = function(server){
         var onlineUser = {};
         onlineUser.socket = socket;
         onlineUser.port = null;
+        onlineUser.socket.emit('online');
         console.log('Client '+onlineUser.socket.id+' Online.');
         onlineUser.socket.on('openPort',function(port){
             onlineUser.port = port;
