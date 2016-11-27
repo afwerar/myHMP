@@ -4,6 +4,11 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mysql = require('mysql');
+var session = require('express-session');
+var MySQLStore = require('express-mysql-session')(session);
+
+var pconfig = require('./database/dbmtools');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -24,6 +29,34 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// var connection = mysql.createConnection(pconfig.getSessionOptions());
+
+// connection.connect();
+// //查询
+// connection.query('select * from `test`', function(err, rows, fields) {
+//   if (err) throw err;
+//   console.log('查询结果为: ', rows);
+// });
+// //关闭连接
+// connection.end();
+// var sessionStore = new MySQLStore({}, connection);
+var sessionStore = new MySQLStore(pconfig.getSessionOptions());
+
+// app.use(session({
+//   key: 'session_cookie_name',
+//   secret: 'session_cookie_secret',
+//   store: sessionStore,
+//   resave: true,
+//   saveUninitialized: true
+// }));
+app.use(session({
+  secret: '12345',
+  name: 'testapp',
+  cookie: { path: '/', httpOnly: true, secure: false, maxAge: 80000 },
+  resave: true,
+  saveUninitialized: true,
+  store: sessionStore
+}));
 
 app.use('/', index);
 app.use('/users', users);
