@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html ng-app="myApp">
+<head>
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-    <a href="/serialportcom"><input type="button" value="打开串口"></input></a>
-  </body>
+    <% include header.html %>
+</head>
+<body ng-controller="socketio">
+    <%if(typeof(user) !== 'undefined' && user){%>
+        <h1>Welcome <%= user.username %>, 欢迎登录！！</h1>
+        <a href="/serialportcom"><input type="button" value="打开串口" /></a>
+        <a claa="btn" href="/logout">退出</a>
+    <%}else{%>
+        <h1>Welcome  , <a claa="btn" href="/login">请登录！！</a></h1>
+    <%}%>
+</body>
+<% include footer.html %>
 </html>

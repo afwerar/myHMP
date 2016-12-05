@@ -1,82 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="myApp">
 <head>
+    <meta charset="utf-8">
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-    <!--socket.io-->
-    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <% include header.html %>
 </head>
-<body>
+<body ng-controller="socketio" ng-init="getPorts()">
     <h1><%= title %></h1>
-    <% if (ports.length) { %>
     <ul>
-        存在的端口:
-        <% ports.forEach(function(port){ %>
-        <label><input name="COM" id='<%= port %>' type="checkbox" value="1" /><%= port %> </label>
-        <% }) %>
+        端口:
+        <label ng-repeat="item in allports" >
+            <input type="checkbox" ng-model="item.open" ng-click="mclick(item)">{{item.name}}
+        </label>
     </ul>
-    <% } %>
-    <% if (openports.length) { %>
     <ul>
-        可连的端口:
-        <% openports.forEach(function(openport){ %>
-        <label><input name="COM" id='<%= openport %>' type="checkbox" value="1" /><%= openport %> </label>
-        <% }) %>
+        监听:
+        <label ng-repeat="item in monitorports" >
+            <input type="checkbox" ng-model="item.monitor" ng-disabled="portschangedisable">{{item.name}}
+        </label>
     </ul>
-    <% } %>
-    <input id="openbtn" type="button" value="连接端口" onclick="openSerialPort()"/>
-    <p>
-        com: <input type="text" id="port" value="COM1" size="12" maxlength="20">
-    <br />
-    <textarea id="sendTextArea" cols="50" rows="10"></textarea>
-    <input id="sendbtn" type="button" value="发送数据" onclick="sendText()" disabled="true"/>
-    <br>
-    <textarea id="recvTextArea" cols="50" rows="10"></textarea>
-</body>
-<script type="text/javascript">
-    var socket = io();
-    function openSerialPort(){
-        if(document.getElementById("openbtn").value==="连接端口"){
-            socket.emit('openPort',document.getElementById("port").value);
-        }else {
-            socket.emit('closePort');
-            document.getElementById("port").readonly=false;
-            document.getElementById("port").disabled=false;
-            document.getElementById("sendbtn").disabled=true;
-            document.getElementById("openbtn").value="连接端口";
-        }
-    }
-    function sendText(){
-        socket.emit('clientToServer',document.getElementById("port").value,
-                document.getElementById("sendTextArea").value);
-    }
 
-    //监听事件
-    socket.on('online', function(){
-        if(document.getElementById("openbtn").disabled){
-            document.getElementById("openbtn").disabled=false;
-            socket.emit('openPort',document.getElementById("port").value);
-            document.getElementById("recvTextArea").value += "a";
-        }
-        document.getElementById("recvTextArea").value += "b";
-    });
-    socket.on('openSuccess', function(){
-        if(document.getElementById("openbtn").value==="连接端口"){
-            document.getElementById("port").readonly=true;
-            document.getElementById("port").disabled=true;
-            document.getElementById("sendbtn").disabled=false;
-            document.getElementById("openbtn").value="断开连接";
-        }
-    });
-    socket.on('serverToClient', function(port,data){
-        document.getElementById("recvTextArea").value += data;
-    });
-    socket.on('disconnect', function(){
-        document.getElementById("port").readonly=false;
-        document.getElementById("port").disabled=false;
-        document.getElementById("sendbtn").disabled=true;
-        document.getElementById("openbtn").disabled=true;
-        document.getElementById("openbtn").value="连接端口";
-    });
-</script>
+    <button type="button" class="btn btn-primary" ng-click="openSerialPort()">
+        {{openbtntxt}}
+    </button>
+    <br>
+    <textarea  cols="50" rows="10" ng-model="rcevtxt" ></textarea>
+    <button type="button" class="btn btn-primary" ng-click="sendText()" ng-disabled="sendbtndisable">
+        {{sendbtntxt}}
+    </button>
+    <br>
+    <textarea cols="50" rows="2"  ng-model="sendtxt" ></textarea>
+</body>
+<% include footer.html %>
 </html>

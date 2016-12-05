@@ -1,13 +1,11 @@
 /**
  * Created by afwerar on 2016/11/20.
  */
-var express = require('express');
-var router = express.Router();
 var serialPort = require("serialport");
 var com = require('../com');
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+exports.get = function(req, res, next) {
     serialPort.list(function (err, ports) {
         var portnames = [];
         var openportnames = com.getOpeningPort();
@@ -20,6 +18,4 @@ router.get('/', function(req, res, next) {
         delete portnames;
         delete openportnames;
     });
-});
-
-module.exports = router;
+};

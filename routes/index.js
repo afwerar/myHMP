@@ -1,21 +1,26 @@
-var express = require('express');
-var session = require('express-session');
-// var MySQLStore = require('express-mysql-session')(session);
-var router = express.Router();
+var login = require('./login');
+var sport = require('./serialportcom');
+var users = require('./users');
 
-/* GET home page. */
-router.get('/',checkLogin);
-router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
-});
-
-function checkLogin(req,res,next){
-  console.log(req.session);
-  if (!req.session.sign) {//检查用户是否已经登录
-    req.session.sign = true;
-    //   return res.redirect('/login');
-  }
-  next();
-}
-
-module.exports = router;
+module.exports = function(app){
+    app.get('/', function (req,res,next){
+        res.redirect('/index');
+    });
+    app.get('/index',function checkLogin(req,res,next){
+        // console.log(req.session);
+        if (req.session.user) {//检查用户是否已经登录
+            res.render('index', { title: 'Express' ,user: {username: req.session.user.username}});
+        }else {
+            res.render('index', { title: 'Express'});
+        }
+    });
+    app.get('/login', login.get);
+    app.post('/login', login.post);
+    app.get('/logout', function (req,res,next){
+        //删除Cookie
+        delete req.session.user;
+        res.redirect('/index');
+    });
+    app.get('/serialportcom', sport.get);
+    app.get('/users', users.get);
+};

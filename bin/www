@@ -9,18 +9,18 @@ var com = require('../com');
 var debug = require('debug')('myhmp-0.0.1:server');
 var http = require('http');
 var io = require('../socketio');
-var pconfig = require('../database/dbmtools');
+var config = require('../config/config');
 
 /**
  * Open serialport server.
  */
-com.runServer(pconfig.getSerialPort());
+com.runServer(config.ports.serialport);
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || pconfig.getWebPort());
+var port = normalizePort(process.env.PORT || config.ports.webport);
 app.set('port', port);
 
 /**
