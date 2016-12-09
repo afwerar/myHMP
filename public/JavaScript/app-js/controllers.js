@@ -13,19 +13,6 @@ app.controller('socketio', function($scope, socket) {
     $scope.portschangedisable = false;
     $scope.sendbtndisable = true;
 
-    $scope.getPorts = function () {
-        socket.emit('getAllPorts',null,function (ports) {
-            "use strict";
-            $scope.allports=ports;
-            var length = ports.length;
-            for(var i=0;i<length;i++){
-                if(ports[i].open){
-                    $scope.monitorports.push({name:ports[i].name,monitor:false});
-                }
-            }
-        });
-    }
-
     $scope.openSerialPort = function () {
         if ($scope.openbtntxt === "连接端口") {
             var monitorportsname=[];
@@ -70,8 +57,35 @@ app.controller('socketio', function($scope, socket) {
         $scope.rcevtxt += data;
     });
 
-    $scope.mclick = function (item) {
+    $scope.getPorts = function () {
+        socket.emit('getAllPorts',null,function (ports) {
+            "use strict";
+            $scope.allports=ports;
+            var length = ports.length;
+            for(var i=0;i<length;i++){
+                if(ports[i].open){
+                    $scope.monitorports.push({name:ports[i].name,show:true,monitor:false});
+                }else {
+                    $scope.monitorports.push({name:ports[i].name,show:false,monitor:false});
+                }
+            }
+        });
+    }
+    $scope.mclick = function (item,index) {
+        // alert(item.name + item.open);
+        socket.emit('switchPort', item,function (reult) {
+            if(reult){
+                item.open=!item.open;
+                if (item.open){
+                    $scope.monitorports[index].show=true;
+                }else {
+                    $scope.monitorports[index].show=false;
+                }
+                $scope.monitorports[index].monitor=false;
+            }else {
+                alert('端口打开失败.');
+            }
+        });
         item.open=!item.open;
-        alert(item.name + item.open);
     }
 })

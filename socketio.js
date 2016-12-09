@@ -20,7 +20,7 @@ exports.getSocketio = function(server){
             fn();
         });
         onlineUser.socket.on('dislistenPorts',function(){
-            console.log('Client '+onlineUser.socket.id+' disconnect to ' + onlineUser.ports);
+            console.log('Client '+onlineUser.socket.id+' dislisten to ' + onlineUser.ports);
             onlineUser.ports = null;
         });
         onlineUser.socket.on('clientToServer',function(data){
@@ -55,15 +55,16 @@ exports.getSocketio = function(server){
             });
         });
         onlineUser.socket.on('switchPort',function (port,fn) {
-            var openportnames = com.getOpeningPort();
-            if((openportnames.indexOf(port.name)>=0)!=port.open){
+            var openPortNames = com.getOpeningPort();
+            var index = openPortNames.indexOf(port.name);
+            if((index>=0)!=port.open){
                 if(port.open){
-                    com.runServer([port.name]);
+                    com.runServer([port.name],fn);
                 }else{
-
+                    com.closeServer(index,fn);
                 }
             }else {
-
+                fn(false);
             }
         })
         onlineUsers.push(onlineUser);

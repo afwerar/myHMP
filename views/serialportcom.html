@@ -10,12 +10,12 @@
     <ul>
         端口:
         <label ng-repeat="item in allports" >
-            <input type="checkbox" ng-model="item.open" ng-click="mclick(item)">{{item.name}}
+            <input type="checkbox" ng-model="item.open" ng-click="mclick(item,$index)" ng-disabled="portschangedisable">{{item.name}}
         </label>
     </ul>
     <ul>
         监听:
-        <label ng-repeat="item in monitorports" >
+        <label ng-repeat="item in monitorports" ng-show="item.show">
             <input type="checkbox" ng-model="item.monitor" ng-disabled="portschangedisable">{{item.name}}
         </label>
     </ul>
