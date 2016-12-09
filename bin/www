@@ -9,13 +9,18 @@ var com = require('../com');
 var debug = require('debug')('myhmp-0.0.1:server');
 var http = require('http');
 var io = require('../socketio');
-var socket = require('../socket');
+var tcpSocket = require('../tcpsocket');
 var config = require('../config/config');
 
 /**
  * Open serialport server.
  */
 com.runServer(config.ports.serialport);
+
+/**
+ * Open serialport server.
+ */
+tcpSocket.runServer(config.ports.socketport);
 
 /**
  * Get port from environment and store in Express.

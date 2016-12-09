@@ -5,18 +5,18 @@
     <title><%= title %></title>
     <% include header.html %>
 </head>
-<body ng-controller="socketio" ng-init="getPorts()">
+<body ng-controller="socketIO" ng-init="getPorts()">
     <h1><%= title %></h1>
     <ul>
-        端口:
-        <label ng-repeat="item in allports" >
-            <input type="checkbox" ng-model="item.open" ng-click="mclick(item,$index)" ng-disabled="portschangedisable">{{item.name}}
+        串口:
+        <label ng-repeat="item in allSerialPorts" >
+            <input type="checkbox" ng-model="item.open" ng-click="switchClick(item,$index)" ng-disabled="portschangedisable">{{item.name}}
         </label>
     </ul>
     <ul>
         监听:
-        <label ng-repeat="item in monitorports" ng-show="item.show">
-            <input type="checkbox" ng-model="item.monitor" ng-disabled="portschangedisable">{{item.name}}
+        <label ng-repeat="item in monitorSerialPorts" ng-show="item.open">
+            <input type="checkbox" ng-model="item.monitor" ng-disabled="portschangedisable" ng-click="switchMonitorClick(item)">{{item.name}}
         </label>
     </ul>
 

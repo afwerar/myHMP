@@ -4,6 +4,7 @@
 var socket_io = require('socket.io');
 var serialPort = require("serialport");
 var com = require('./com');
+var tcpSocket = require('./tcpsocket');
 
 //在线用户
 var onlineUsers = new Array();
@@ -19,7 +20,7 @@ exports.getSocketio = function(server){
             console.log('Client '+onlineUser.socket.id+' listens to '+ports);
             fn();
         });
-        onlineUser.socket.on('dislistenPorts',function(){
+        onlineUser.socket.on('disListenPorts',function(){
             console.log('Client '+onlineUser.socket.id+' dislisten to ' + onlineUser.ports);
             onlineUser.ports = null;
         });
@@ -40,33 +41,27 @@ exports.getSocketio = function(server){
         });
 
         onlineUser.socket.on('getAllPorts', function(data,fn) {
-            serialPort.list(function (err, ports) {
-                var portnames = [];
-                var openportnames = com.getOpeningPort();
+            serialPort.list(function (err, serialPorts) {
+                var portNameObjects = {serialPortObjects:[],socketPortNames:null};
+                var openingSerialPortNames = com.getOpeningPort();
 
-                ports.forEach(function(port) {
-                    if(port.pnpId===undefined){
-                        portnames.push({name:port.comName,open:(openportnames.indexOf(port.comName)>=0)});
+                serialPorts.forEach(function(serialPort) {
+                    if(serialPort.pnpId===undefined){
+                        portNameObjects.serialPortObjects.push({name:serialPort.comName,open:(openingSerialPortNames.indexOf(serialPort.comName)>=0)});
                     }
                 });
-                fn(portnames);
-                delete portnames;
-                delete openportnames;
+                portNameObjects.socketPortNames = tcpSocket.getListeningPort();
+                fn(portNameObjects);
+                delete portNameObjects;
+                delete openingSerialPortNames;
             });
         });
-        onlineUser.socket.on('switchPort',function (port,fn) {
-            var openPortNames = com.getOpeningPort();
-            var index = openPortNames.indexOf(port.name);
-            if((index>=0)!=port.open){
-                if(port.open){
-                    com.runServer([port.name],fn);
-                }else{
-                    com.closeServer(index,fn);
-                }
-            }else {
-                fn(false);
-            }
-        })
+        onlineUser.socket.on('switchSerialPort',function (portObject,fn) {
+            com.switchServer(portObject,fn);
+        });
+        onlineUser.socket.on('switchSocketPort',function (portObject,fn) {
+            tcpSocket.switchServer(portObject,fn);
+        });
         onlineUsers.push(onlineUser);
     });
 };
