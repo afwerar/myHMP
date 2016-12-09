@@ -8,18 +8,13 @@ var tcpSocket = require('./tcpsocket');
 
 //在线用户
 var onlineUsers = new Array();
-exports.getSocketio = function(server){
+exports.getSocketIO = function(server){
     var io = socket_io.listen(server);
     io.sockets.on('connection', function (socket) {
         var onlineUser = {};
         onlineUser.socket = socket;
         onlineUser.ports = null;
         console.log('Client '+onlineUser.socket.id+' connect.');
-        onlineUser.socket.on('listenPorts',function(ports,fn){
-            onlineUser.ports = ports;
-            console.log('Client '+onlineUser.socket.id+' listens to '+ports);
-            fn();
-        });
         onlineUser.socket.on('disListenPorts',function(){
             console.log('Client '+onlineUser.socket.id+' dislisten to ' + onlineUser.ports);
             onlineUser.ports = null;
@@ -58,6 +53,16 @@ exports.getSocketio = function(server){
         });
         onlineUser.socket.on('switchSerialPort',function (portObject,fn) {
             com.switchServer(portObject,fn);
+        });
+        onlineUser.socket.on('switchMonitorSerialPort',function (portNames,fn) {
+            onlineUser.ports = null;
+            onlineUser.ports = portNames;
+            if(portNames.length>0){
+                console.log('Client '+onlineUser.socket.id+' listens to '+portNames);
+            }else{
+                console.log('Client '+onlineUser.socket.id+' listens to none.');
+            }
+            fn();
         });
         onlineUser.socket.on('switchSocketPort',function (portObject,fn) {
             tcpSocket.switchServer(portObject,fn);

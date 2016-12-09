@@ -2,44 +2,18 @@
  * Created by afwerar on 2016/11/28.
  */
 app.controller('socketIO', function($scope, socket) {
-    $scope.sendtxt = '';
-    $scope.rcevtxt = '';
+    $scope.sendTxt = '';
+    $scope.receiveTxt = '';
     $scope.allSerialPorts = [];
     $scope.monitorSerialPorts = [];
-    $scope.sendports = [];
-    $scope.rcevports = [];
-    $scope.openbtntxt = '连接端口';
-    $scope.sendbtntxt = '发送数据';
-    $scope.portschangedisable = false;
-    $scope.sendbtndisable = true;
+    $scope.sendPorts = [];
+    $scope.sendBtnTxt = '发送数据';
+    $scope.portsChangeDisable = false;
+    $scope.sendBtnDisable = true;
 
-    $scope.openSerialPort = function () {
-        if ($scope.openbtntxt === "连接端口") {
-            var monitorPortsName=$scope.monitorSerialPorts.filter(function (monitorPort) {
-                return monitorPort.monitor;
-            }).map(function (monitorPortName) {
-                return monitorPortName.name;
-            });
-            if(monitorPortsName.length>0){
-                socket.emit('listenPorts', monitorPortsName,function () {
-                    $scope.portschangedisable = true;
-                    $scope.sendbtndisable = false;
-                    $scope.openbtntxt = '断开连接';
-                });
-            }else {
-                alert('请选择要监听的端口');
-            }
-        } else {
-            socket.emit('disListenPorts');
-            $scope.portschangedisable = false;
-            $scope.sendbtndisable = true;
-            $scope.openbtntxt = '连接端口';
-        }
-    }
     socket.on('disconnect', function () {
-        $scope.portschangedisable = false;
-        $scope.sendbtndisable = true;
-        $scope.openbtntxt = '连接端口';
+        $scope.portsChangeDisable = false;
+        $scope.sendBtnDisable = true;
         alert('服务器失去连接，请重新刷新.');
         location.reload();
     });
@@ -47,12 +21,12 @@ app.controller('socketIO', function($scope, socket) {
         var length = $scope.monitorSerialPorts.length;
         for (var i=0;i<length;i++){
             if($scope.monitorSerialPorts[i].monitor){
-                socket.emit('clientToServer',{name:$scope.monitorSerialPorts[i].name,content:$scope.sendtxt});
+                socket.emit('clientToServer',{name:$scope.monitorSerialPorts[i].name,content:$scope.sendTxt});
             }
         }
     }
     socket.on('serverToClient', function (port, data) {
-        $scope.rcevtxt += data;
+        $scope.receiveTxt += data;
     });
 
     $scope.getPorts = function () {
@@ -78,6 +52,20 @@ app.controller('socketIO', function($scope, socket) {
         item.open=!item.open;
     }
     $scope.switchMonitorClick = function (item) {
-        
+        var monitorPortsName=$scope.monitorSerialPorts.filter(function (monitorPort) {
+            return monitorPort.monitor;
+        }).map(function (monitorPortName) {
+            return monitorPortName.name;
+        });
+        item.monitor!=item.monitor;
+        socket.emit('switchMonitorSerialPort', monitorPortsName,function () {
+            if(monitorPortsName.length>0){
+                $scope.sendBtnDisable = false;
+            }else{
+                $scope.sendBtnDisable = true;
+            }
+            item.monitor!=item.monitor;
+            delete monitorPortsName;
+        });
     }
 })

@@ -10,26 +10,23 @@
     <ul>
         串口:
         <label ng-repeat="item in allSerialPorts" >
-            <input type="checkbox" ng-model="item.open" ng-click="switchClick(item,$index)" ng-disabled="portschangedisable">{{item.name}}
+            <input type="checkbox" ng-model="item.open" ng-click="switchClick(item,$index)" ng-disabled="portsChangeDisable">{{item.name}}
         </label>
     </ul>
     <ul>
         监听:
         <label ng-repeat="item in monitorSerialPorts" ng-show="item.open">
-            <input type="checkbox" ng-model="item.monitor" ng-disabled="portschangedisable" ng-click="switchMonitorClick(item)">{{item.name}}
+            <input type="checkbox" ng-model="item.monitor" ng-disabled="portsChangeDisable" ng-click="switchMonitorClick(item)">{{item.name}}
         </label>
     </ul>
 
-    <button type="button" class="btn btn-primary" ng-click="openSerialPort()">
-        {{openbtntxt}}
+    <br>
+    <textarea  cols="50" rows="10" ng-model="receiveTxt" ></textarea>
+    <button type="button" class="btn btn-primary" ng-click="sendText()" ng-disabled="sendBtnDisable">
+        {{sendBtnTxt}}
     </button>
     <br>
-    <textarea  cols="50" rows="10" ng-model="rcevtxt" ></textarea>
-    <button type="button" class="btn btn-primary" ng-click="sendText()" ng-disabled="sendbtndisable">
-        {{sendbtntxt}}
-    </button>
-    <br>
-    <textarea cols="50" rows="2"  ng-model="sendtxt" ></textarea>
+    <textarea cols="50" rows="2"  ng-model="sendTxt" ></textarea>
 </body>
 <% include footer.html %>
 </html>
