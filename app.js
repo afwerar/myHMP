@@ -22,7 +22,7 @@ var sessionStore = new MySQLStore(config.sessionoptions);
 app.use(session({
     secret: '12345',
     name: 'testapp',
-    cookie: { path: '/', httpOnly: true, secure: false, maxAge: 80000 },
+    cookie: { path: '/', httpOnly: true, secure: false, maxAge: config.sessionTime },
     resave: true,
     saveUninitialized: true,
     store: sessionStore

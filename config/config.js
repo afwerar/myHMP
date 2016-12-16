@@ -32,5 +32,6 @@ module.exports={
                 data: 'data'
             }
         }
-    }
+    },
+    sessionTime:3600000
 }

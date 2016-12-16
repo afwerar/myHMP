@@ -6,13 +6,13 @@ app.controller('socketIO', function($scope, socket) {
     $scope.receiveTxt = '';
     $scope.allSerialPorts = [];
     $scope.monitorSerialPorts = [];
+    $scope.socketPorts = [];
     $scope.sendPorts = [];
     $scope.sendBtnTxt = '发送数据';
-    $scope.portsChangeDisable = false;
     $scope.sendBtnDisable = true;
+    $scope.addSocketPortName = '';
 
     socket.on('disconnect', function () {
-        $scope.portsChangeDisable = false;
         $scope.sendBtnDisable = true;
         alert('服务器失去连接，请重新刷新.');
         location.reload();
@@ -24,7 +24,7 @@ app.controller('socketIO', function($scope, socket) {
                 socket.emit('clientToServer',{name:$scope.monitorSerialPorts[i].name,content:$scope.sendTxt});
             }
         }
-    }
+    };
     socket.on('serverToClient', function (port, data) {
         $scope.receiveTxt += data;
     });
@@ -37,8 +37,13 @@ app.controller('socketIO', function($scope, socket) {
                 port.moniter=false;
                 return port;
             });
+            var length=portNameObjects.socketPortNames.length;
+            for(var i=0;i<length;i++)
+            {
+                $scope.socketPorts.push({name:portNameObjects.socketPortNames[i],listen:false});
+            }
         });
-    }
+    };
     $scope.switchClick = function (item,index) {
         socket.emit('switchSerialPort', item,function (result) {
             if(result){
@@ -50,7 +55,7 @@ app.controller('socketIO', function($scope, socket) {
             }
         });
         item.open=!item.open;
-    }
+    };
     $scope.switchMonitorClick = function (item) {
         var monitorPortsName=$scope.monitorSerialPorts.filter(function (monitorPort) {
             return monitorPort.monitor;
@@ -67,5 +72,14 @@ app.controller('socketIO', function($scope, socket) {
             item.monitor!=item.monitor;
             delete monitorPortsName;
         });
-    }
+    };
+    $scope.switchSocketListenClick = function (item) {
+        console.log(item);
+    };
+    $scope.removeSocketClick = function (item) {
+        console.log(item);
+    };
+    $scope.addSocketClick = function () {
+        console.log($scope.addSocketPortName);
+    };
 })
