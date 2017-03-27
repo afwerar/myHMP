@@ -13,14 +13,18 @@ exports.getSocketIO = function(server){
     io.sockets.on('connection', function (socket) {
         var onlineUser = {};
         onlineUser.socket = socket;
-        onlineUser.ports = null;
+        onlineUser.serialPorts = [];
+        onlineUser.socketPorts = [];
         console.log('Client '+onlineUser.socket.id+' connect.');
-        onlineUser.socket.on('disListenPorts',function(){
-            console.log('Client '+onlineUser.socket.id+' dislisten to ' + onlineUser.ports);
-            onlineUser.ports = null;
-        });
         onlineUser.socket.on('clientToServer',function(data){
-            com.writePort(data.name,data.content);
+            if(onlineUser.serialPorts!=null&&onlineUser.serialPorts.indexOf(data.name)>=0)
+            {
+                com.writePort(data.name,data.content);
+            }
+            if(onlineUser.socketPorts!=null&&onlineUser.socketPorts.indexOf(data.name)>=0)
+            {
+                tcpSocket.writePort(data.name,data.content);
+            }
             console.log('Client to '+data.name+' says: ' + data.content);
             console.log(new Buffer(data.content));
         });
@@ -51,33 +55,52 @@ exports.getSocketIO = function(server){
                 delete openingSerialPortNames;
             });
         });
-        onlineUser.socket.on('switchSerialPort',function (portObject,fn) {
-            com.switchServer(portObject,fn);
+
+        onlineUser.socket.on('openSerialPort',function (portName,fn) {
+            com.openServer(portName,fn);
+        });
+        onlineUser.socket.on('closeSerialPort',function (portName,fn) {
+            com.closeServer(portName,fn);
         });
         onlineUser.socket.on('switchMonitorSerialPort',function (portNames,fn) {
-            onlineUser.ports = null;
-            onlineUser.ports = portNames;
-            if(portNames.length>0){
-                console.log('Client '+onlineUser.socket.id+' listens to '+portNames);
+            onlineUser.serialPorts = null;
+            onlineUser.serialPorts = portNames;
+            if(onlineUser.socketPorts.length>0||onlineUser.serialPorts.length>0){
+                console.log('Client '+onlineUser.socket.id+' listens to '+ onlineUser.socketPorts + onlineUser.serialPorts);
             }else{
                 console.log('Client '+onlineUser.socket.id+' listens to none.');
             }
             fn();
         });
-        onlineUser.socket.on('switchSocketPort',function (portObject,fn) {
-            tcpSocket.switchServer(portObject,fn);
+
+        onlineUser.socket.on('addSocketPort',function (portName,fn) {
+            tcpSocket.openServer(portName,fn);
+        });
+        onlineUser.socket.on('removeSocketPort',function (portName,fn) {
+            tcpSocket.closeServer(portName,fn);
+        });
+        onlineUser.socket.on('switchListenSocketPort',function (portNames,fn) {
+            onlineUser.socketPorts=null;
+            onlineUser.socketPorts=portNames;
+            if(onlineUser.socketPorts.length>0||onlineUser.serialPorts.length>0){
+                console.log('Client '+onlineUser.socket.id+' listens to '+ onlineUser.socketPorts + onlineUser.serialPorts);
+            }else{
+                console.log('Client '+onlineUser.socket.id+' listens to none.');
+            }
+            fn();
         });
         onlineUsers.push(onlineUser);
     });
 };
 
-exports.writeIO=function(port,data){
+exports.writeIO=function(portName,data){
     var length=onlineUsers.length;
     for (var i=0;i<length;i++){
-        if(onlineUsers[i].ports!=null&&onlineUsers[i].ports.indexOf(port)>=0||port==='all'){
-            onlineUsers[i].socket.emit('serverToClient',port,data.toString());
+        if((onlineUsers[i].serialPorts!=null&&onlineUsers[i].serialPorts.indexOf(portName)>=0)||
+            (onlineUsers[i].socketPorts!=null&&onlineUsers[i].socketPorts.indexOf(portName)>=0)){
+            onlineUsers[i].socket.emit('serverToClient',portName,data.toString());
         }
     }
-    console.log("Server " + port + " to client says: " + data);
+    console.log("Server " + portName + " to client says: " + data);
     console.log(data);
 }

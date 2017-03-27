@@ -8,8 +8,6 @@ app.controller('socketIO', function($scope, socket) {
     $scope.monitorSerialPorts = [];
     $scope.socketPorts = [];
     $scope.sendPorts = [];
-    $scope.sendBtnTxt = '发送数据';
-    $scope.sendBtnDisable = true;
     $scope.addSocketPortName = '';
 
     socket.on('disconnect', function () {
@@ -22,6 +20,12 @@ app.controller('socketIO', function($scope, socket) {
         for (var i=0;i<length;i++){
             if($scope.monitorSerialPorts[i].monitor){
                 socket.emit('clientToServer',{name:$scope.monitorSerialPorts[i].name,content:$scope.sendTxt});
+            }
+        }
+        length = $scope.socketPorts.length;
+        for (var i=0;i<length;i++){
+            if($scope.socketPorts[i].listen){
+                socket.emit('clientToServer',{name:$scope.socketPorts[i].name,content:$scope.sendTxt});
             }
         }
     };
@@ -45,15 +49,27 @@ app.controller('socketIO', function($scope, socket) {
         });
     };
     $scope.switchClick = function (item,index) {
-        socket.emit('switchSerialPort', item,function (result) {
-            if(result){
-                item.open=!item.open;
-                $scope.monitorSerialPorts[index].open=item.open;
-                $scope.monitorSerialPorts[index].monitor=false;
-            }else {
-                alert('端口打开失败.');
-            }
-        });
+        if(item.open){
+            socket.emit('openSerialPort', item.name,function (result) {
+                if(result){
+                    item.open=!item.open;
+                    $scope.monitorSerialPorts[index].open=item.open;
+                    $scope.monitorSerialPorts[index].monitor=false;
+                }else {
+                    alert('端口打开失败.');
+                }
+            });
+        }else{
+            socket.emit('closeSerialPort', item.name,function (result) {
+                if(result){
+                    item.open=!item.open;
+                    $scope.monitorSerialPorts[index].open=item.open;
+                    $scope.monitorSerialPorts[index].monitor=false;
+                }else {
+                    alert('端口关闭失败.');
+                }
+            });
+        }
         item.open=!item.open;
     };
     $scope.switchMonitorClick = function (item) {
@@ -64,22 +80,40 @@ app.controller('socketIO', function($scope, socket) {
         });
         item.monitor!=item.monitor;
         socket.emit('switchMonitorSerialPort', monitorPortsName,function () {
-            if(monitorPortsName.length>0){
-                $scope.sendBtnDisable = false;
-            }else{
-                $scope.sendBtnDisable = true;
-            }
             item.monitor!=item.monitor;
             delete monitorPortsName;
         });
     };
-    $scope.switchSocketListenClick = function (item) {
-        console.log(item);
-    };
-    $scope.removeSocketClick = function (item) {
-        console.log(item);
-    };
     $scope.addSocketClick = function () {
         console.log($scope.addSocketPortName);
+        socket.emit('addSocketPort', $scope.addSocketPortName,function (result) {
+            if(result){
+                $scope.socketPorts.push({name:$scope.addSocketPortName,listen:false});
+                $scope.addSocketPortName='';
+            }else {
+                alert('端口'+$scope.addSocketPortName+'打开失败！')
+            }
+        });
+    };
+    $scope.removeSocketClick = function (item,index) {
+        socket.emit('removeSocketPort', item.name,function (result) {
+            if(result){
+                $scope.socketPorts.splice(index,1);
+            }else {
+                alert('端口'+item.name+'关闭失败！')
+            }
+        });
+    };
+    $scope.switchListenSocketClick = function (item) {
+        var listenSocketPortsName=$scope.socketPorts.filter(function (listenSocketPort) {
+            return listenSocketPort.listen;
+        }).map(function (socketListenPortName) {
+            return socketListenPortName.name;
+        });
+        item.monitor!=item.monitor;
+        socket.emit('switchListenSocketPort', listenSocketPortsName,function () {
+            item.monitor!=item.monitor;
+            delete listenSocketPortsName;
+        });
     };
 })

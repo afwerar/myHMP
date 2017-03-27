@@ -2,19 +2,26 @@
  * Created by afwerar on 2016/12/5.
  */
 var net = require('net');
+var io = require('./socketio');
+
 var socketPortServerList = [];
 
 function socketPortServer(portName,fn) {
     this.portName = portName;
     var clientList = [];
     this.socketServerCtrl = new net.createServer();
+    this.writeInfo = function (data) {
+        var length = clientList.length;
+        for(var i=0;i<length;i++){
+            clientList[i].write(data);
+        }
+    }
     this.socketServerCtrl.on('connection', function(client) {
         client.name = client.remoteAddress + ':' + client.remotePort;
-        client.write('Hi ' + client.name + '!\n');
-        console.log(client.name + ' connect.');
         clientList.push(client);
 
         client.on('data', function(data) {
+            io.writeIO(portName,data);
             console.log(client.name + ' say ' +data);
         });
         client.on('end', function() {
@@ -39,7 +46,20 @@ function socketPortServer(portName,fn) {
 exports.runServer = function(portNames,fn){
     var length = portNames.length;
     for (var i=0; i < length; i++) {
-        socketPortServerList.push(new socketPortServer(portNames[i],function (result) {
+        this.openServer(portNames[i],fn);
+    }
+};
+exports.openServer =function (portName,fn) {
+    var index = null;
+    var length = socketPortServerList.length;
+    for(var i = 0;i<length;i++){
+        if(socketPortServerList[i].portName===portName){
+            index=i;
+            break;
+        }
+    }
+    if(index===null){
+        socketPortServerList.push(new socketPortServer(portName,function (result) {
             if(!result){
                 delete socketPortServerList[socketPortServerList.length-1].socketServerCtrl;
                 delete socketPortServerList[socketPortServerList.length-1];
@@ -47,38 +67,30 @@ exports.runServer = function(portNames,fn){
             }
             if(fn!=null) fn(result);
         }));
-    }
-};
-
-exports.closeServer = function(portName,fn) {
-    var portObject={index:null,name:portName}
-    socketPortServerList.some(function (socketPortServer,index) {
-        this.index = index;
-        return socketPortServer.portName===this.name;
-    },portObject);
-
-    socketPortServerList[portObject.index].serialPortCtrl.close(function () {
-        console.log(socketPortServerList[portObject.index].portName + " do not listen！");
-        delete  socketPortServerList[portObject.index].serialPortCtrl;
-        delete socketPortServerList[portObject.index];
-        socketPortServerList.splice(portObject.index,1);
-        delete portObject;
-        fn(true);
-    });
-}
-
-exports.switchServer = function (portObject,fn) {
-    var checkOpening = socketPortServerList.some(function (socketPortServer) {
-        return socketPortServer.portName===this.name;
-    },{name:portObject.name});
-    if(checkOpening===portObject.open){
-        fn(true);
-        return;
-    }
-    if(portObject.open){
-        this.runServer([portObject.name],fn);
     }else {
-        this.closeServer(portObject.name,fn);
+        if(fn!=null) fn(true);
+    }
+}
+exports.closeServer = function(portName,fn) {
+    var index = null;
+    var length = socketPortServerList.length;
+    for(var i = 0;i<length;i++){
+        if(socketPortServerList[i].portName===portName){
+            index=i;
+            break;
+        }
+    }
+    if(index!=null)
+    {
+        socketPortServerList[index].socketServerCtrl.close(function () {
+            console.log(socketPortServerList[index].portName + " do not listen！");
+            delete  socketPortServerList[index].socketServerCtrl;
+            delete socketPortServerList[index];
+            socketPortServerList.splice(index,1);
+            if(fn!=null) fn(true);
+        });
+    }else{
+        if(fn!=null) fn(true);
     }
 }
 
@@ -86,14 +98,10 @@ exports.writePort=function(portName,data){
     var length = socketPortServerList.length;
     for (var i=0;i<length;i++){
         if(portName===socketPortServerList[i].portName){
-            socketPortServerList[i].socketServerCtrl.write(data, function(err, results) {
-                if(err!=null) console.log('Error: ' + err);
-                if(results!=null) console.log('Results: ' + results);
-            });
+            socketPortServerList[i].writeInfo(data);
         }
     }
 }
-
 exports.getListeningPort=function () {
     return socketPortServerList.map(function (socketServer) {
         return socketServer.portName;

@@ -1,6 +1,7 @@
 var login = require('./login');
 var sport = require('./serialportcom');
 var users = require('./users');
+var my3d = require('./my3d');
 
 module.exports = function(app){
     app.get('/', function (req,res,next){
@@ -22,5 +23,10 @@ module.exports = function(app){
         res.redirect('/index');
     });
     app.get('/serialportcom', sport.get);
+    app.get('/my3d', my3d.get);
+    app.get('/my3d1', function(req, res, next){
+        "use strict";
+        res.render('my3d1');
+    });
     app.get('/users', users.get);
 };

@@ -27,48 +27,52 @@ function serialPortServer(portName,fn) {
 exports.runServer = function(portNames,fn){
     var length = portNames.length;
     for (var i=0; i < length; i++) {
-        serialPortServerList.push(new serialPortServer(portNames[i],function(result) {
+        this.openServer(portNames[i],fn);
+    }
+};
+exports.openServer = function (portName,fn) {
+    var index = null;
+    var length = serialPortServerList.length;
+    for(var i = 0;i<length;i++){
+        if(serialPortServerList[i].portName===portName){
+            index=i;
+            break;
+        }
+    }
+    if(index===null){
+        serialPortServerList.push(new serialPortServer(portName,function (result) {
             if(!result){
-                delete  serialPortServerList[serialPortServerList.length-1].serialPortCtrl;
+                delete serialPortServerList[serialPortServerList.length-1].socketServerCtrl;
                 delete serialPortServerList[serialPortServerList.length-1];
                 serialPortServerList.pop();
             }
             if(fn!=null) fn(result);
         }));
-    }
-};
-
-exports.closeServer = function(portName,fn){
-    var portObject={index:null,name:portName}
-    serialPortServerList.some(function (serialPortServer,index) {
-        this.index = index;
-        return serialPortServer.portName===this.name;
-    },portObject);
-
-    serialPortServerList[portObject.index].serialPortCtrl.close(function () {
-        console.log(serialPortServerList[portObject.index].portName + " close successfully！");
-        delete  serialPortServerList[portObject.index].serialPortCtrl;
-        delete serialPortServerList[portObject.index];
-        serialPortServerList.splice(portObject.index,1);
-        delete portObject;
-        fn(true);
-    });
-};
-
-exports.switchServer = function (portObject,fn) {
-    var checkOpening = serialPortServerList.some(function (serialPortServer) {
-        return serialPortServer.portName===this.name;
-    },{name:portObject.name});
-    if(checkOpening===portObject.open){
-        fn(true);
-        return;
-    }
-    if(portObject.open){
-        this.runServer([portObject.name],fn);
     }else {
-        this.closeServer(portObject.name,fn);
+        if(fn!=null) fn(true);
     }
 }
+exports.closeServer = function(portName,fn){
+    var index = null;
+    var length = serialPortServerList.length;
+    for(var i = 0;i<length;i++){
+        if(serialPortServerList[i].portName===portName){
+            index=i;
+            break;
+        }
+    }
+    if(index!==null){
+        serialPortServerList[index].serialPortCtrl.close(function () {
+            console.log(serialPortServerList[index].portName + " close successfully！");
+            delete  serialPortServerList[index].serialPortCtrl;
+            delete serialPortServerList[index];
+            serialPortServerList.splice(index,1);
+            if(fn!=null) fn(true);
+        });
+    }else {
+        if(fn!=null) fn(true);
+    }
+};
 
 exports.writePort=function(portName,data){
     var length = serialPortServerList.length;

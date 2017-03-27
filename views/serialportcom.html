@@ -28,8 +28,8 @@
         <div class="row">
             <div class="col-md-1" ng-repeat="item in socketPorts track by $index">
                 <label class="btn btn-default btn-sm">
-                    <input type="checkbox" ng-model="item.listen" ng-click="switchSocketListenClick(item)" >{{item.name}}
-                    <button type="button" class="close" aria-hidden="true" ng-click="removeSocketClick(item)">&times;</button>
+                    <input type="checkbox" ng-model="item.listen" ng-click="switchListenSocketClick(item)" >{{item.name}}
+                    <button type="button" class="close" aria-hidden="true" ng-click="removeSocketClick(item,$index)">&times;</button>
                 </label>
             </div>
             <div class="col-md-2">
@@ -44,8 +44,8 @@
     </div>
     <br>
     <textarea  cols="50" rows="10" ng-model="receiveTxt" ></textarea>
-    <button type="button" class="btn btn-primary" ng-click="sendText()" ng-disabled="sendBtnDisable">
-        {{sendBtnTxt}}
+    <button type="button" class="btn btn-primary" ng-click="sendText()">
+        发送数据
     </button>
     <br>
     <textarea cols="50" rows="2"  ng-model="sendTxt" ></textarea>

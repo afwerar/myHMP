@@ -8,6 +8,8 @@
     <%if(typeof(user) !== 'undefined' && user){%>
         <h1>Welcome <%= user.username %>, 欢迎登录！！</h1>
         <a href="/serialportcom"><input type="button" value="打开串口" /></a>
+        <a href="/my3d"><input type="button" value="3D绘图" /></a>
+        <a href="/my3d1"><input type="button" value="3D绘图1" /></a>
         <a claa="btn" href="/logout">退出</a>
     <%}else{%>
         <h1>Welcome  , <a claa="btn" href="/login">请登录！！</a></h1>
