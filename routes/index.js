@@ -28,5 +28,13 @@ module.exports = function(app){
         "use strict";
         res.render('my3d1');
     });
+    app.get('/my3d2', function(req, res, next){
+        "use strict";
+        res.render('my3d2');
+    });
+    app.get('/my3d3', function(req, res, next){
+        "use strict";
+        res.render('my3d3');
+    });
     app.get('/users', users.get);
 };
